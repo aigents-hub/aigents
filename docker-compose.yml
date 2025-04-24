@@ -5,7 +5,7 @@ services:
   # PORT RANGE 64**
   qdrant:
     image: qdrant/qdrant:latest
-    container_name: qdrant
+    container_name: aigents_qdrant
     environment:
       QDRANT__STORAGE__PATH: /qdrant/storage
       QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY}
@@ -20,8 +20,25 @@ services:
     networks:
       - aigents_network
 
+  # PORT RANGE 90**
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-02-07T23-21-09Z
+    container_name: aigents_minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - '9000:9000'  # Puerto para la API S3
+      - '9001:9001'  # Puerto para la consola web de MinIO
+    volumes:
+      - ${VOLUME_STORAGE:-./.storage}/aigents/minio:/data
+    networks:
+      - aigents_network
+
 volumes:
   qdrant:
+  minio:
 
 networks:
   aigents_network:
