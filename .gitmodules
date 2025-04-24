@@ -1,0 +1,6 @@
+[submodule "aigents-site"]
+	path = aigents-site
+	url = https://github.com/aigents-hub/aigents-site.git
+[submodule "aigents-api"]
+	path = aigents-api
+	url = https://github.com/aigents-hub/aigents-api.git
