@@ -1,7 +1,7 @@
 # aigents #
 
 services:
-  # --- ALMACENAMIENTO --- #
+  # --- STORAGE --- #
   # PORT RANGE 64**
   qdrant:
     image: qdrant/qdrant:latest
@@ -29,8 +29,8 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     ports:
-      - '9000:9000'  # Puerto para la API S3
-      - '9001:9001'  # Puerto para la consola web de MinIO
+      - '9000:9000'  # Port for S3 API
+      - '9001:9001'  # Port for MinIO web console
     volumes:
       - ${VOLUME_STORAGE:-./.storage}/aigents/minio:/data
     networks:

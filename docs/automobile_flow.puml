@@ -1,0 +1,61 @@
+@startuml automobile_flow
+
+box "Front"
+  actor Home
+end box
+
+box "Backend"
+  participant "Conversation WS" as Conversation
+  participant "Notification WS" as Notification
+  participant "Tool Service" as Tool
+  participant "Workflow Service" as WorkflowService
+end box
+
+box "OpenAI"
+  participant "Realtime Service\n(gpt-4o-mini-realtime-preview)" as Realtime
+  participant "Agent Search\n(gpt-4o-mini-search-preview)" as AgentBusqueda
+  participant "Agent Structure\n(gpt-4o-mini)" as AgentEstructura
+end box
+
+box "Qdrant"
+  participant "Vector Store" as VectorDB
+end box
+
+== Audio Capture & Request ==
+Home -> Conversation     : Capture microphone audio
+Conversation -> Realtime : Send audio chunk
+Realtime -> Conversation : function_call "searchAutomobile"
+
+== Internal Backend Flow ==
+note over Conversation
+  Upon receiving the function_call,
+  invoke the Tool Service
+end note
+Conversation -> Tool      : Execute "searchAutomobile"
+Tool -> VectorDB          : Query vector store
+
+alt Vector Store finds results
+    VectorDB --> Tool     : Return results
+else No results found
+    VectorDB --> Tool                : Empty response
+    Tool -> WorkflowService          : Invoke agent workflow
+    WorkflowService -> AgentBusqueda : Perform search
+    AgentBusqueda --> WorkflowService: Return raw data
+    WorkflowService -> AgentEstructura: Structure data
+    AgentEstructura --> WorkflowService: Return Automobile object
+    WorkflowService -> VectorDB      : Insert new Automobile
+    VectorDB --> WorkflowService     : Insert confirmation
+    WorkflowService --> Tool         : Return structured results
+end
+
+Tool -> Realtime         : Return tool output
+
+== Visual Notification ==
+Tool -> Notification     : Send automobile notification
+Notification -> Home     : Display popup with result
+
+== Audio Generation & Delivery ==
+Realtime -> Conversation : Request TTS for output
+Conversation -> Home     : Deliver and play audio
+
+@enduml

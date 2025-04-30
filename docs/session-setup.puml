@@ -1,0 +1,34 @@
+@startuml session_setup
+
+box "Front"
+  actor Home
+end box
+
+box "Backend & Services"
+  participant "Session Service" as Session
+  participant "Conversation" as Conversation
+  participant "Notification" as Notification
+end box
+
+== Connection and Session Flow ==
+Home -> Session : GET /session (Home)
+activate Session
+
+Session -> Conversation : Init WS context
+activate Conversation
+Conversation --> Session : Context ready
+deactivate Conversation
+
+Session -> Notification : Init WS context
+activate Notification
+Notification --> Session : Context ready
+deactivate Notification
+
+Session --> Home : 200 OK + sessionId
+deactivate Session
+
+== WebSocket Connection ==
+Home -> Conversation : Connect ?session={sessionId}
+Home -> Notification : Connect ?session={sessionId}
+
+@enduml
